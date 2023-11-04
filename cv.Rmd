@@ -1,0 +1,185 @@
+---
+title: "Steven Jiménez CV"
+author: STeven Jimenez
+date: "`r Sys.Date()`"
+output:
+  pagedown::html_resume:
+    # set it to true for a self-contained HTML page but it'll take longer to render
+    self_contained: false
+# uncomment this line to produce HTML and PDF in RStudio:
+#knit: pagedown::chrome_print
+---
+
+Aside
+================================================================================
+
+
+![Steven Jimenez](https://media.licdn.com/dms/image/D4E03AQGYkN5dFGICqQ/profile-displayphoto-shrink_200_200/0/1675224535259?e=1704326400&v=beta&t=m3flTqbQXTDCcjg7MHvwJgwNLOHYi9QFHcVbECNoPFA){width=80%}
+
+
+Contact Info {#contact}
+--------------------------------------------------------------------------------
+
+- <i class="fa fa-envelope"></i> stjimenezgo@gmail.com
+- <i class="fa fa-github"></i> [github.com/stjimenezgo](https://github.com/stjimenezgo)
+- For more information, please contact me via email.
+
+
+Skills {#skills}
+--------------------------------------------------------------------------------
+
+- Power system stability, integration and impact study of Distributed Energy Resources, nonlinear systems, optimization and mathematical modeling of engineering problems.
+
+- Fast learning, teamwork, enthusiasm in teaching, creative, effective, responsible.
+
+- Highly skilled in Python, Matlab, LaTeX, R, DigSilent - PowerFactory, RTLab.
+
+
+Disclaimer {#disclaimer}
+--------------------------------------------------------------------------------
+
+This resume was made with the R package [**pagedown**](https://github.com/rstudio/pagedown).
+
+Last updated on `r Sys.Date()`.
+
+
+
+Main
+================================================================================
+
+Steven Jimenez {#title}
+--------------------------------------------------------------------------------
+
+### Business Designer at XM S.A. E.S.P.
+### Economic Applied Master Student at EAFIT University.
+
+As a leader in innovation, I have a passion for identifying and solving the complex problems facing our planet. I leverage my extensive experience in strategy development and execution to drive sustainable growth and create positive change. With a focus on the future, I use cutting-edge technologies and data-driven insights to create innovative solutions that improve people's lives. Whether I'm collaborating with cross-functional teams or fostering relationships with stakeholders, I am dedicated to making a positive impact and building a better future for all.
+
+Education {data-icon=graduation-cap data-concise=true}
+--------------------------------------------------------------------------------
+
+### EAFIT University
+
+Master in Applied Economics
+
+Medellin, Colombia
+
+2023
+
+Thesis: -On definition-
+
+### Universidad Nacional de Colombia
+
+M.Eng. in Electrical Engineering
+
+Medellin, Colombia
+
+2021
+
+Thesis: Analysis of Frequency Impact in Power Systems with Integration of Renewable Resources
+
+### Universidad Nacional de Colombia
+
+Bachelor in Control Engineering
+
+Medellin, Colombia
+
+2016
+
+Grade-- 4.3/5.0 - Last 2 years: 4.3/5.0
+
+### Universidad Nacional de Colombia
+
+Bachelor in Electrical Engineering
+
+Medellin, Colombia
+
+2015
+
+Grade-- 4.3/5.0 - Last 2 years: 4.5/5.0
+
+
+Selected Publications {data-icon=file}
+--------------------------------------------------------------------------------
+
+### Analysis of Frequency Impact in Power Systems with Integration of Renewable Resources.
+
+FISE-IEEE/CIGRE Conference - Living the energy Transition (FISE/CIGRE), IEEE Xplore
+
+Medellin, Colombia
+
+2019
+
+**Jimenez, S.** Botero, H.
+
+### FISE - IEEE/ CIGRE Living the energy Transition
+
+FISE - IEEE/ CIGRE CONFERENCE 2019, FISE - IEEE/ CIGRE CONFERENCE 2019
+
+Medellin, Colombia
+
+2019
+
+
+Professional Experience {data-icon=suitcase}
+--------------------------------------------------------------------------------
+
+### Business Developer
+
+XM S.A. E.S.P
+
+Medellin, Colombia
+
+July 18, 2022 -- Present.
+
+::: concise
+Energy project lead focused on creating technological solutions with analytics services, blockchain, webscrapping, analysis of electrical power systems, real-time simulation, energy transition, etc.
+:::
+
+### Operation Engineer
+
+XM S.A. E.S.P
+
+Medellin, Colombia
+
+January 25, 2018 -- July 17, 2022.
+
+::: concise
+Real time operation of Colombian Electrical Power System at National Dispatch Center.
+:::
+
+
+Teaching Experience {data-icon=chalkboard-teacher}
+--------------------------------------------------------------------------------
+
+### Electric Circuit Analysis II
+
+Facultad de Minas - Universidad Nacional de Colombia
+
+Medellin, Colombia
+
+Semester 2018-II -- Semester 2019-II.
+
+::: concise
+**Immediate boss:** PhD. Carlos Andrés Ramos Paja.
+
+Class about first and second order circuits, frequency response and filter design.
+:::
+
+### Power Electronics
+
+Facultad de Minas - Universidad Nacional de Colombia
+
+Medellin, Colombia
+
+Semester 2017-II.
+
+::: concise
+**Immediate boss:** PhD. Eliana Isabel Arango.
+
+Class about fundaments of power electronics, focused on DC-DC converters.
+:::
+
+
+
+
