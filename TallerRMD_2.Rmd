@@ -1,0 +1,486 @@
+---
+title: ""
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+---
+
+```{r setup, include=FALSE}
+## Global options
+knitr::opts_chunk$set(cache = TRUE)
+
+library(summarytools)
+library(haven)
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+library(data.table)
+library(dplyr)
+
+```
+
+```{r Lectura de los datos, echo=FALSE}
+file_dir = "C:/Users/StevenJG/Documents/Mis Documentos/EAFIT - Maestría/04_Econometría/Taller 2/BostonHousing.dta"
+data <- read_dta(file_dir)
+```
+
+## Punto 1
+
+**Pregunta: ** Leer cuidadosamente el documento de Harrison y Rubinfeld (1978) y hacer un resumen muy breve (no más de un página). Describa el objetivo o propósito del estudio, la metodología utilizada (datos y en una ecuación describa el modelo econométrico estimado) y los principales resultados o conclusiones encontrados
+
+**Resumen**
+
+El artículo investiga los problemas metodológicos asociados con el uso de los datos del mercado inmobiliario para medir la voluntad de pago por aire limpio. Con el uso de un modelo hedónico de precios de vivienda y datos del área metropolitana, son generadas estimaciones cuantitativas en la voluntad de pago por mejoras en la calidad del aire. Daños de polución marginal son encontrados que incrementan con el nivel de polución de aire y con el ingreso de los propietarios. Los resultados son relativamente sensibles a la especificación de una ecuación hedónica del precio de la vivienda, pero insensibles a la especificación de la ecuación de demanda de calidad de aire.
+
+Mayor intensión por comprar una vivienda donde la contaminación de aire sea baja. Y probar que hay mayor interés por comprar una casa en un lugar de baja contaminación de aire frente a un inmueble idéntico en una zona más contaminada. El artículo muestra que varios estudios han realizado estas investigaciones, pero han realizado suposiciones que quedan embebidas en los procedimientos. El artículo trabaja sobre datos del mercado inmobiliario de Boston de 1970, datos que contienen más información sobre los vecindarios y variables necesarias para aislar la influencia de la contaminación por aire, así como datos más confiables de calidad de aire.
+
+El estudio parte de un análisis donde se supone a los compradores como maximizadores de sus beneficios al comprar su casa. En donde se consideran atributos como accesibilidad, infraestructura, características del vecindario y concentraciones de contaminación de aire. Los factores también involucran ingreso anual y costos de transporte.
+
+Harrison y Rubinfeld crean un modelo de valoración de vivienda que incluye variables independientes donde se cuenta con dos atributos estructurales, ocho variables del vecindario, dos variables de accesibilidad y una de contaminación de aire. La variable de contaminación utilizada es la concentración de óxido nitroso denominada (NOX). Y como variable dependiente se toma el valor medio de casas ocupadas por sus propietarios como (MV) o como el logaritmo de (MV), debido a que encuentran un mejor ajuste con el trabajo semilogarítmico de la variable. Por otra parte, utilizan una función polinómica de (NOX)^p donde p es una variable desconocida. Esto es realizado para determinar diferentes patrones de influencia de la contaminación del aire, encontrando, que el mejor ajuste estadístico se logró cuando p era igual a dos.
+
+Las variables contenidas en la base de datos son, a nivel estructural, (RM) y (AGE), que son el numero promedio de habitación en una propiedad y la proporción de unidades de vivienda construidas antes de 1940, cuyo dato está relacionado generalmente con la calidad de la estructura; a nivel de vecindario, se cuenta con (B) como proporción de población afrodescendiente, (LSTAT) como proporción de población con estatus bajo, asociado a baja escolaridad o trabajos como obreros, (CRIM) como tasa de crimen de la zona, (ZN) como la proporción de residentes en una porción de tierra más grande de (25,000) pies cuadrados, (INDUS) como la proporción de negocios de no retail en acres por zona, (TAX) como el impuesto a la propiedad por cada 10.000 usd, (PTRATIO) como la razón entre la cantidad de estudias vs. profesores en una zona, (CHAS) como la cercanía a los límites del río Charles, a nivel de accesibilidad, (DIS) como la distancia a cinco centros de empleo en Boston, (RAD) como el índice de accesibilidad a vías radiales y finalmente, (NOX) como la concentración de óxido nitroso en partes por cientos de millones.
+
+Los modelos implementados por el estudio concluyen constantemente sobre la significancia de los coeficientes calculados, tanto para los modelos de (W) como voluntad de pago, o como (log (W)) en ecuaciones tipo Log-Log en algunos casos.
+
+El estudio concluye que el modelo logra reducir el error de estimación de los beneficios hasta en un 60%, al incluir dentro del modelo de voluntad de compra de vivienda las variables de contaminación de aire, atributos de la vivienda y valores de vivienda.
+
+## Punto 2
+
+**Pregunta: ** Haga un análisis descriptivo del precio de la vivienda (densidad, media, sd, min, max, p25, p50, p75). Realice un análisis de correlación (con significancia estadística), y scatter plot y la línea de regresión entre el precio de la vivienda y la contaminación del aire y otro determinante importante que ustedes crean. Interprete los resultados.
+
+**Respuesta: **
+
+**2.1 Análisis descriptivo**
+
+```{r Punto 2.1 - Análisis descriptivo}
+
+summ_bh = data |> 
+  summarise(mean = mean(medv),
+            sd = sd(medv),
+            mediana = median(medv),
+            p25 = quantile(medv,.25),
+            p50 = quantile(medv,.50),
+            p75 = quantile(medv,.75),
+            min = min(medv),
+            max = max(medv))
+print(summ_bh)
+```
+
+Interpretación.
+
+De acuerdo con la información arrojada, enocntramos que el valor promedio de las viviendas para el año 1970 en Boston se encontraba alrededor de USD 22.532, con en rango de variación del valor medio de las viviendas es de USD 9.197 dado por la desviación estandar. Así mismo, el percentil 50 y la mediana son USD 21.200, siendo cercano al valor de la media, lo cual podría indicar que los datos no son dispersos, a pesar de que el valor min se encuentra en USD 5.000 y el máximo en USD 50.000. 
+
+
+**2.2 Densidad**
+
+```{r}
+ggplot(data, aes(x=medv)) + 
+  geom_density()
+```
+Interpretación.
+
+Tal cual se vio en la analitica descriptiva, la densidad nos muestra que los precios de las viviendas están en su mayoria concentrados entre USD 10.000 y USD 30.000 dolares, lo cual sugiere que los datos no son tan heterogeneros o no estan tán dispersos. 
+
+
+**2.3 Correlación y ScatterPlot entre contaminación y precio de la vivienda**
+
+```{r Punto 2.2 - Correlación y scatter plot}
+
+corr_nox_medv = cor.test(data$nox, data$medv)
+print(corr_nox_medv)
+
+ggscatter(data, x = "nox", y = "medv",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          color = "#FF5733",
+          xlab = "Concentración de Óxido Nitroso en partes por 10M", 
+          ylab = "Valor medio de casas ocupadas por propietarios en miles de USD")
+
+```
+
+Interpretación.
+
+De acuerdo con los resultados de la correlación se ve que hay una relación negativa media baja entre el precio medio de la vivienda y la contaminación del aire, medida en la concentración de óxido nitroso. Igualmente, la relación es estadisticamente significativa, toda vez que el valor de p es menor a 0.05.
+
+El scatter plot concuerda con la correlación encontrada al mostrar la relación negativa entre ambas variables. Esto quiere decir, que a medida de que la concentración de oxido nitroso aumenta, esta devalua el precio medio de la vivienda. Con la información podemos inferir que las personas si consideran aspectos como la salud y el impacto que la contaminación genera en esta y en las condiciones fisicas del entorno donde están ubicadas las viviendas, por tanto estan dispuestos a pagar más por las viviendas que están expuestas a menores de grados de contaminación.
+
+
+**2.4 Correlación y scatter plot de variable lstat (% de población con status bajo)**
+
+```{r Correlación y scatter plot de variable lstat}
+corr_lstat_medv = cor.test(data$medv,data$lstat)
+print(corr_lstat_medv)
+
+ggscatter(data, x = "lstat", y = "medv",
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          color = "#6DC36D",
+          xlab = "% de población con status bajo", 
+          ylab = "Valor medio de casas ocupadas por propietarios en miles de USD")
+
+```
+
+Interpretación.
+
+De acuerdo con los resultados de la correlación se ve que hay una relación negativa alta entre el precio medio de la vivienda y el porcentaje de personas con estado socioeconomico bajor en cada zona.Esta correlación es además estadisticamente significativa, ya que P value es menor que 0.05. 
+
+El scatter plot muestra dicha relación negativa entre ambas variables con una correlación mayor entre el status y el precio que con la variable de contaminación, toda vez que la correlación es mas cercana a 1. Esto quiere decir, que a medida que crece el procentaje con condiciones socioeconomicas bajas en las zonas donde estaán ubicadas las viviendas, el precio medio de la vivienda disminuye. Con esta información podemos inferir que posiblemente las viviendas y su calidad pueden ser menores en ciertas zonas, por lo cual a menor calidad el precio de la vivienda puede disminuir, y dado que las personas con menor status tienen un nivel de educación menor y son en su mayoría obreros, según el paper, esto limita el acceso a empleos mejor remunerados, a mejores ingresos y por ende a viviendas con precios más altos.
+
+## Punto 3
+
+**Pregunta: **  Construya las variables utilizadas por Harrison y Rubinfeld (1978) en el modelo economérico que ellos estimaron. Con estas variables construidas estime un modelo (modelo A) que explique el precio de la vivienda en función de la contaminación, y las variables de estructura de la vivienda. Determine si existe una relación convexa o rendimientos crecientes entre el precio de la vivienda y el número de habitaciones (llame a este modelo, modelo B), y calcule el número de habitaciones en el que el precio de la vivienda comienza a ser positivo. Seleccione el mejor modelo entre A y B e interprete los resultados en términos
+económicos (coeficientes estimados, su significancia estadística, los intervalos de confianza, $R^2$ y su versión ajustada, y la significancia global de la regresión).
+
+**Respuesta: **
+
+```{r Modificación de data para los modelos}
+
+data_model <- 
+  data |> 
+    mutate(logmedv = log(medv)) |> 
+    mutate(logcmedv = log(cmedv)) |> 
+    mutate(logdis = log(dis)) |> 
+    mutate(lograd = log(rad)) |> 
+    mutate(logstat = log(lstat)) |> 
+    mutate(b_sq = (b/1000)) |> 
+    mutate(rm_sq = rm^2) |> 
+    mutate(nox_p = nox^2)
+
+```
+
+
+Para la creación de las nuevas variables tuvimos en cuenta la tabla 6 del paper en la cual se describían las variables que fueron usadas y los cambios realizados cuando tuvieron mejor ajuste, por ejemplo rm y $rm^2$. Para la variable $(B-0.63)^2$ tuvimos en cuenta la descripción que aparecia de la misma en el archivo de datos Boston Housing, según la cual b=1000*(B-0.63) y, por ende, para la creación de la variable tomamos la variable b y la dividimos en 1000.
+
+
+**3.1 Modelo A**
+
+```{r Modelo a}
+
+model_a <- lm(logmedv ~
+                 nox +
+                 rm +
+                 age, 
+              data = data_model)
+summ_mdla = summary(model_a)
+print(summ_mdla)
+
+```
+
+
+**3.2 Modelo B**
+
+```{r Modelo b}
+
+model_b <- lm(logmedv ~ 
+                nox + 
+                rm + 
+                rm_sq +
+                age, 
+              data = data_model)
+summ_mdlb = summary(model_b)
+print(summ_mdlb)
+
+```
+*3.3 Comparación de modelos*
+
+```{r Comparación de modelos}
+
+rsq_adj_mdla = summ_mdla['adj.r.squared']
+rsq_adj_mdlb = summ_mdlb['adj.r.squared']
+
+print(rsq_adj_mdla)
+print(rsq_adj_mdlb)
+
+summ_rm = data |> 
+  summarise(mean = mean(rm),
+            min = min(rm),
+            max = max(rm))
+print(summ_rm)
+
+```
+
+
+**3.4 Relación convexa y rendimientos crecientes**
+
+$lmedv = \log{medv} = \beta_0 + \beta_1 rm + \beta_2 rm^2 + \beta_3 age + \beta_4 nox$
+
+Determine si existe una relación convexa o rendimientos crecientes
+entre el precio de la vivienda y el número de habitaciones (llame a este modelo, modelo B)
+
+$\partial lmedv / \partial rm = \beta_1 + 2 \beta_2 rm$
+
+Para saber si existen rendimiento son positivos en algún punto, entonces $ \partial lmedv / \partial rm  > 0$, por tanto:
+
+$\beta_1 + 2 \beta_2 rm > 0$
+
+Despejando $rm$:
+
+$rm > -\beta_1 / (2\beta_2)$
+
+Para hallar la convexida de la ecuación, se deriva por segunda vez $lmedv$
+
+$\partial^2 lmedv / \partial rm^2 =  2 \beta_2$
+
+Por tanto, para detrminar si existe una relación convexa $\beta_2$ deberá ser positiva. Dado que en el modelo_b el valor del coeficiente de $rm^2$ es 0.0851235, podemos decir que sí existe una relación convexa. 
+
+Adicionalmente, calculando el punto crítico de $rm$:
+
+```{r}
+rm_c = -(-0.7962529)/(2*0.0851235)
+print(rm_c)
+
+```
+
+Por tanto, casas con más de 4 habitaciones (4.67) tendrán rendimientos positivos, es decir el precio de la vivienda será más alto cuando tengan mayor número de habitaciones, esto se da debido a que este tipo de viviendas tienen mayor espacio y son mejor valoradas por las personas. 
+
+*Intervalos de confianza:*
+
+```{r Definición de intervalos de confianza para modelo b}
+
+intconf_mdlb = confint(model_b)
+print(intconf_mdlb)
+
+```
+
+Interpretación.
+Comparando ambos modelos, podemos determinar que aquel que tienen un mejor ajuste es el Modelo B, toda vez que el $R^2$ ajustado es más alto, 0.5566681 frente a 0.519509. Sin embargo, al analizar cada modelo podemos decir que ambos son estadisticamente significativos debido a que el valor P de ambos es menor que 0.05. Adicionalmente en ambos modelos, todas los coeficientes de las variables consideradas son significativos, ya que todas presentan un valor P menor que 0.05.
+
+Igualmente, después de escoger el Modelo B podemos decir que de acuerdo con los resultados, por un amento en la concetración del oxido nistroso en las diferentes zonas el precio medio de las viviendas disminuye en un 93.73% siempre y cuando las otras variables se mantengan iguales. Así mismo, sucede con la variable age, ya que con el aumento de los años de las viviendas, el precio medio de las mismas disminuye en 0.24% manteniendo las otras variables constantes. 
+
+Por su parte los coefcientes de $rm$ y $rm^2$ deben analizarse en conjunto, ya que la variación del precio de la vivienda tiene un comportamiento no lineal con respecto a la cantidad de cuartos (rm). Así, y como lo mencionamos anteriormente, el cuando las viviendas tienen entre 1 y 4 cuartos el precio medio de la vivienda en el mercado tiende a disminuir, mientras que las viviendas con más de 4 habitaciones tendrán un mayor precio medio.
+
+## Punto 4
+
+**Pregunta: ** Uno de los alcaldes de las ciudades sugiere que la contaminación del aire tiene un importante efecto negativo en el mercado inmobiliario, y plantea que puede disminuir el precio de las viviendas en un 100%. Otro alcalde más negativo plantea que un incremento en la contaminación generará que el precio de la vivienda pueda disminuir es más de un 200%. A partir del modelo seleccionado en el anterior numeral corrobore si estás hipótesis de los alcaldes se rechazan o no.
+
+**Respuesta: ** 
+
+*Prueba de hipótesis: 100% *
+
+$H_o: B_{nox} = - 100\%$ 
+
+$H_a: B_{nox} \not= - 100\%$
+
+$RD$ es rechazar $H_o$ si: $t_c > t_t$ ó $P_v < \alpha$, donde $\alpha$ es igual a:
+
+```{r Definición de alpha}
+
+alpha = 0.05
+
+```
+
+
+Calculando $t_c = (\widehat{\beta} - \beta_{est})/ sd_{\beta_{est}}$
+
+```{r Prueba por tabla-t con 100%}
+
+t_c1 = (-0.9373456 - (-1))/0.1566416
+t_t1 = qt(alpha/2, 506-5, lower.tail = FALSE)
+
+if (abs(t_c1) > t_t1) {
+   print("Se rechaza Ho por prueba t1")
+} else{
+    print("No se rechaza Ho por prueba t1")
+}
+
+```
+
+```{r Prueba por P-value con 100%}
+
+p_v1 = pt(t_c1, 506-5, lower.tail = FALSE)
+
+if (p_v1 < alpha) {
+   print("Se rechaza Ho por P-value")
+} else{
+    print("No se rechaza Ho por P-value")
+}
+
+```
+
+*Prueba de hipótesis: 200% *
+
+$H_o: B_{nox} = - 200\%$ 
+
+$H_a: B_{nox} < - 200\%$
+
+$RD$ es rechazar $H_o$ si: $t_c > t_t$ ó $P_v < \alpha$, donde $\alpha$ es igual a 0.05.
+
+Calculando $t_c = (\widehat{\beta} - \beta_{est})/ sd_{\beta_{est}}$
+
+```{r Prueba por tabla-t con 200%}
+
+t_c2 = (-0.9373456 - (-2))/0.1566416
+t_t2 = qt(alpha/2, 506-5, lower.tail = FALSE)
+
+if (abs(t_c2) > t_t2) {
+   print("Se rechaza Ho por prueba t")
+} else{
+    print("No se rechaza Ho por prueba t")
+}
+
+```
+
+```{r Prueba por P-value con 200%}
+
+p_v2 = pt(t_c2, 506-5, lower.tail = FALSE)
+
+if (p_v2 < alpha) {
+   print("Se rechaza Ho por P-value")
+} else{
+    print("No se rechaza Ho por P-value")
+}
+
+```
+Interpretación.
+
+De acuerdo con la información obtenida al considerar ambos casos, podemos ninguno de los alcaldes tiene razóm, ya que en ambos caso se rechaza la Ho y se acepta la Ha. Es decir, en ambos casos el TC fue mayor que el TT y el Pvalue mayor a 0.05. Esto también va de la mano con los resultados del Modelo B, ya que según este el valor en que rebaja la vivienda al aumentar el nivel de contaminación es de 93%.
+
+Por los resultados, se puede responder a ambos alcaldes. Es posible validar la hipótesis del primer alcalde donde se intuye que un aumento marginal en la contaminación por óxido nitroso del aire puede generar una variación negativa en el precio del 100%. Sin embargo, por otra parte, se debe informar al alcalde 2, que el crecimiento negativo esperado de más 200% no es una hipótesis cierta, es decir, el precio de la vivienda no variará más del 200% ante un aumento en el nivel de contaminación del aire por óxido nitroso.
+
+## Punto 5
+
+**Pregunta: ** Estime un modelo C, que será el modelo seleccionado en el numeral 3 más las otras variables incorporadas en el modelo estimado por Harrison y Rubinfeld (1978) (continue incorporando nox en forma lineal). Interprete los resultados (coeficientes, significancia individual y R2). ¿Este modelo C tiene mejor ajuste que el modelo seleccionado en el numeral 3?, ¿por qué?
+
+**Modelo C**
+
+```{r Modelo c}
+
+model_c <- lm(logmedv ~ 
+                rm + 
+                rm_sq +
+                age +
+                logdis + 
+                lograd + 
+                tax +
+                ptratio +
+                b_sq + 
+                logstat + 
+                crim + 
+                zn + 
+                indus +
+                chas + 
+                nox,  
+            data = data_model)
+summ_mdlc = summary(model_c)
+print(summ_mdlc)
+
+rm_c_modeloc = -(-0.4177365)/(2*0.1173346) 
+print(rm_c) 
+
+```
+
+Interpretación.
+
+De acuerdo con el modelo encontramos que este presenta un ajuste alto ya que tiene un $R^2$ ajustado de 0.805, es decir, cercano a 1. Adicionalmente, el modelo también es estdísticamente significativo ya que el P Value general es menor que 0.05. 
+
+En cuanto a cada una de los coeficientes de las variables consideradas, para $rm$ y $rm^2$ tenemos la misma situación que en el punto tres, es decir, los coeficentes de las varibles tienen una relación convexa, donde las viviendas con un número menor o igual a 3 cuartos el precio desciende, pero a partir de 4 cuartos en adelante el valor comienza a aumentar por cada cuarto adicional. Igualmente, el impacto de ambas es significativo estadísticamente, ya que los valores de PValue estan por debajo de 0.05.
+
+Del coeficiente de la variable age, podemos decir que esta esta tiene una relación positiva con la con precio medio de la vivienda, es decir por cada aumento en el nivel de la proporción de casas construidas antes de 1940 el valor de la vivienda aumenta un 0.0145%, si las otras variables se mantienen estables, lo cual es un aumento bajo en comparación con otras variables. Adicionalmemte, al revisar su significancia estadística encontramos que esta no es alta, es decir, que considerando ambas aspectos no influye tanto en la toma de decisión de las personas.
+
+Por su parte, el coeficiente de la variable logdis tiene una relación negativa respecto al precio medio de la vivienda, es decir, por una incremento de 1% en la distancia a los centros de empleo, el precio de la vivienda disminuye en 17,52%, si las otras variables se mantienen estables. Igualmente esta variable es significancia estadística al tener un Pvalue menor que 0.05. COn esta información podríamos inferir que las personas consideran que es importante que las viviendas estén cerca a estos centros de servicios, y esto puede deberse a que por lo general estos lugares se enuentran en zonas centrales con buen acceso al otros servicios públicos (trasnporte, colegios, etc).
+
+El coeficiente de la variable lograd presenta por su parte una relación postiva con el precio medio de las viviendas y tiene significancia estadística alta. Es decir, cuando el index de accesibilidad incrementa 1%, el valor de la vivienda aumenta en 9.32%, si las otras variables se mantienen estables, lo cual puede deberse principalmente a que viviendas con mayor facilidad de acceso al trasnporte público son mejor valoradas que aquellas que tienen un acceso más complicado, esto es especialmente evidente en personas con menor presupuesto que posiblemente tampoco puedan acceder a un medio de trasnporte propio.
+
+Sobre el coeficiente de la variable tax, podemos decir que la relación es negativa con el precio medio de la vivienda, teniendo una significancia estadística alta. Es decir, por aca incremento de la tasa de impuesto por el valor completo de la vivienda, el precio aumenta en 0.408% si las otras variables se mantienen estables. Esto quiere decir que el impacto no es tan alto pero si es significativo, lo cual puede deberse a que las personas tienen a considerar generalmente en como disminuir el valor de impuestos a pagar, y el precio completo de las viviendas tiene influencia en los mismos.
+
+Para el coeficiente de la variable Pratio, se observa una relación negativa con el precio medio de las viviendas y una significancia estadística alta. En este caso, con un incremento en el numero de estudiantes por profesor el precio medio de las viviendas disminuye en 2.86% si todo el resto de las variables permanencen constantes. Esto puede deberse debido que a mayor número de estudiantes por profesor, esto puede indicar una menor calidad en la educación, por lo tanto, las personas pueden tener en cuenta esta variable, especialmente si tienen hijos, ya que impactaría en cierto grado en la educación que recibirían.
+
+Para el coeficiente de la variable logstat, podemos decir que la relación es negativa respecto del precio medio de las viviendas, con una significancia estadistica alta. En esta, por cada aumento de 1% en el porcentaje de las personas de status bajo que viven en las zonas el precio medio de la vivienda disminuye un 36.30%, lo cual puede deberse principalmente a la razon explicada en el punto 2, según la cual, posiblemente las viviendas y su calidad pueden ser menores en ciertas zonas, y a menor calidad el precio de la vivienda puede disminuir. Así mismo, dado que las personas con menor status tienen un nivel de educación menor y son en su mayoría obreros, esto limita el acceso a empleos mejor remunerados, a mejores ingresos y por ende a viviendas con precios más altos.
+
+El coeficiente de la variable crim también tiene una relación negativa y una significancia estadística alta con respecto al precio medio de la vivienda. En este caso, por cada aumento en la tasa de crimen en cada ciudad o zona, el valor de la vivienda disminuye 1.21%, si todas las otras variables permanecen constantes. Lo anterior se puede deber a que a mayor tasa de crimen se tienen mayores tasas de inseguridad, y para las personas esto puede ser fundamental al momento de comprar vivienda. Adicionalmemte, unas mayores tasas de crimen se asocian a unas mayores tasas de pobreza y otras problemáticas sociales. 
+
+En el caso del coeficiente de la varaible zn, la relacion es negativa con respecto al precio medio de las viviendas, pero en este caso no es estadísticamente significativa, ya que el Pvalue es mayor a 0.05. De acuerdo con el modelo, si la proporción de zonas residenciales con lotes mayores a 25.000 mts2 aumenta, el precio medio de la vivienda disminuye en 0.0187%, si todas las otras variables se mantienen constantes. Como se ve el valor no denota un cambio muy grande, pero podemos inferir que esto se debe a que al tener una restrición en la zona puede generar que las viviendas sean más grandes, por endes más costosas y ser menos comerciales. 
+
+Del coeficiente de la variable indus podemos decir que tienen una relación positiva con el precio medio de las viviendas, pero igual que el caso anterior, este no es estadísticamente significativo. Para este caso, al darse un aumento en la proporción de empresas no retail en las zonas, el precio medio de las viviendas aumenta en 0.09204%, si el resto de las variables permanecen igual. Es decir, el cambio no es alto y esto puede deberse a que algunas personas pueden encontrar conveniente vivir cerca a las empresas, ya que esto les permitirá ahorrar tiempo o en otros gastos como lo son el trasnporte.
+
+Con el coficiente de la variable chas, se observa una relación positiva y medianamente significativa frente al precio medio de las viviendas. Según el modelo, cuando aumenta la cercania al rio Charles, el precio medio de la vivienda aumenta en 8.609% si el resto de las variables permanecen iguales. De esto podemos inferir que las personas prefieren la cercania al rio porque acá se podría presentar más zonas verdes y amenidades en las cercanías de las viviendas. 
+
+Por último, en este moedelo el coeficiente de la variable nox también tiene una relación negativa con el precio medio de las viviendas y una significancia estadística alta. Es decir, por cada aumento en las concentraciones de oxido nitroso el valor medio de las viviendas disminuye en un 83.29%, siempre y cuando las otras variables se mantengan iguales. Lo anterior, y en concordancia con lo expresado en el punto 2.3, puede deberse a que las personas si consideran aspectos como la salud y el impacto que la contaminación genera en esta y en las condiciones fisicas del entorno donde están ubicadas las viviendas, por tanto estan dispuestos a pagar más por las viviendas que están expuestas a menores de grados de contaminación.
+
+## Punto 6
+
+**Pregunta: ** Con el fin calcular efectos heterogéneos de la contaminación del aire sobre el precio de la vivienda, estime el modelo C en las colas de la distribución del precio de la vivienda. Estime esto para el 25% de las viviendas con el valor más bajo y el 25% de las viviendas más costosas. A partir de los modelos estimados analice si existen efectos diferenciales de la contaminación del aire, la estructura de la vivienda, las características del vecindario y la accesibilidad sobre el precio de la vivienda. ¿Cuáles son las posibles explicaciones a estas diferencias?
+
+**Respuesta: **
+
+```{r Organización de los modelos}
+
+medv_p25 = as.numeric(summ_bh['p25'][1,1,1])
+medv_p75 = as.numeric(summ_bh['p75'][1,1,1])
+
+print(medv_p25)
+print(medv_p75)
+
+data_model_p25 = filter(data_model, medv <= medv_p25) 
+
+data_model_p75 = filter(data_model, medv >= medv_p75) 
+
+```
+
+```{r Modelo c - P25}
+
+model_c_p25 <- lm(logmedv ~ 
+                rm + 
+                rm_sq +
+                age +
+                logdis + 
+                lograd + 
+                tax +
+                ptratio +
+                b_sq + 
+                logstat + 
+                crim + 
+                zn + 
+                indus +
+                chas + 
+                nox,  
+            data = data_model_p25)
+summ_mdlc_p25 = summary(model_c_p25)
+print(summ_mdlc_p25)
+
+```
+
+```{r Modelo c - P75}
+
+model_c_p75 <- lm(logmedv ~ 
+                rm + 
+                rm_sq +
+                age +
+                logdis + 
+                lograd + 
+                tax +
+                ptratio +
+                b_sq + 
+                logstat + 
+                crim + 
+                zn + 
+                indus +
+                chas + 
+                nox,  
+            data = data_model_p75)
+summ_mdlc_p75 = summary(model_c_p75)
+print(summ_mdlc_p75)
+
+```
+
+```{r Comparación de modelo C - P25 y P75}
+
+rsq_adj_p25 = summ_mdlc_p25['adj.r.squared']
+rsq_adj_p75 = summ_mdlc_p75['adj.r.squared']
+
+print(rsq_adj_p25)
+print(rsq_adj_p75)
+
+```
+
+Interpretación.
+
+Comparando ambas variaciones del Modelo C, podemos concluir que ambos modelos son estadíssticamente significativos ya que el valor de P es menor a 0.05, sin embargo, aquel que considera el 25% de las viviendas con el precio más alto tiene mayor ajuste que aquel que considera el 25% de las viviendas con el precio más bajo, 0.7308 frente a 0.5604. Así mismo, cuando miramos el Modelo C 25, de las viviendas con los precios más bajos, vemos que 13 de 15 de los coeficientes de las variables consideradas tienen significancia estadística mientras que en el Modelo C 75, de las viviendas con precios mas altos, solo 9 de 15 coeficientes tienen significancia estadística.
+
+Lo anterior se puedde deber a que las personas que tienen menores ingresos y por enden pueden adquirir viviendas de menor valor tienden a considerar mas aspectos como el acceso al transporte público (rad), el valor de los impuestos que se deben pagar por las viviendas, la cantidad de industria en las zonas, entre otras, ya que deben buscar la mejor opción considerando el presupuesto limitado que tienen, es decir son mas sensibles a los cambios de los precios por las diferentes variables. 
+
+Por su parte, las personas con mayores ingresos y por ende con un mayor presupuesto de compra, no son tan sensibles a ciertas variables, ya que pueden ser mas flexibles con el presupuesto y buscar opciones que de por sí pueden estar ubicadas en zonas con menos contaminación, menos industria, entre otros. Así mismo, puede inferirse que estás personas tendrán capacidad para renovar las casas viejas o para pagar más impuestos, hecho que hace que los coeficientes de variables como tax o age no tengan significancia estadística. 
+
+
